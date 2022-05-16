@@ -11,12 +11,12 @@ import ru.t1.yd.ocrservice.configuration.TessdataConfiguration;
 import java.nio.file.Path;
 
 @Service
-public final class OCRService {
+public final class OcrService {
 
     private final ITesseract tesseractInstance;
 
     @Autowired
-    public OCRService(@NotNull TessdataConfiguration tessdataConfiguration) {
+    public OcrService(@NotNull TessdataConfiguration tessdataConfiguration) {
         this.tesseractInstance = new Tesseract();
         tesseractInstance.setLanguage(tessdataConfiguration.getLang());
         tesseractInstance.setDatapath(tessdataConfiguration.getPath());
