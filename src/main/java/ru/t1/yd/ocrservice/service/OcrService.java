@@ -5,15 +5,20 @@ import net.sourceforge.tess4j.Tesseract;
 import net.sourceforge.tess4j.TesseractException;
 import org.jetbrains.annotations.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.codec.multipart.FilePart;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 import ru.t1.yd.ocrservice.configuration.TessdataConfiguration;
 import ru.t1.yd.ocrservice.utils.CommonUtil;
 
-import java.nio.file.Path;
-import java.util.Locale;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
 
 @Service
 public final class OcrService {
+
+    private static final String FAIL_STRING = "***OCR-SERVICE FAILURE!***";
 
     private final ITesseract tesseractInstance;
 
@@ -26,25 +31,40 @@ public final class OcrService {
         tesseractInstance.setDatapath(datapath);
     }
 
-    private synchronized String getCharactersFromImage(@NotNull final Path filepath) throws TesseractException {
-        return tesseractInstance.doOCR(filepath.toFile()).replaceAll("\n", "");
+    public Mono<String> getFullStringFromImage(@NotNull final FilePart filePart){
+        return getCharactersFromFilePart(filePart);
     }
 
-    public String getFullStringFromImage(@NotNull final Path filepath) throws TesseractException {
-        return getCharactersFromImage(filepath);
+    public Mono<String> getIntegerFromImage(@NotNull final FilePart filePart){
+        return getCharactersFromFilePart(filePart).map(s -> s.replaceAll("[^\\d]", ""));
     }
 
-    public Integer getIntegerFromImage(@NotNull final Path filepath) throws TesseractException, NumberFormatException {
-        String fullResultString = getCharactersFromImage(filepath);
-        String numString = fullResultString.replaceAll("[^\\d]", "");
-        return Integer.parseInt(numString);
+    public Mono<String> textFromImageContains(@NotNull final FilePart filePart, @NotNull final String patternToSearch){
+        return getCharactersFromFilePart(filePart).map(s -> {
+            if(s.contains(patternToSearch)) return "true";
+            return "false";
+        });
     }
 
-    public boolean textFromImageContains(@NotNull final Path filepath, @NotNull final String pattern) throws TesseractException {
-        boolean result = false;
-        String fullResultString = getCharactersFromImage(filepath);
-        if (fullResultString.toLowerCase(Locale.ROOT).contains(pattern.toLowerCase(Locale.ROOT))) result = true;
-        return result;
+    private synchronized String getCharactersFromImage(@NotNull BufferedImage image) throws TesseractException {
+        return tesseractInstance.doOCR(image);
+    }
+
+    private String getCharactersFromImageBytes(byte[] imageBytes){
+        try {
+            ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
+            BufferedImage image = ImageIO.read(inputStream);
+            return getCharactersFromImage(image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return FAIL_STRING;
+        }
+    }
+
+    private Mono<String> getCharactersFromFilePart(@NotNull final FilePart filePart) {
+        return Mono.from(filePart.content().map(dataBuffer -> dataBuffer.asByteBuffer().array())
+                .reduce(CommonUtil::concatByteArrays)
+                .map(this::getCharactersFromImageBytes));
     }
 
 }
