@@ -14,6 +14,7 @@ import ru.t1.yd.ocrservice.utils.CommonUtil;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
+import java.nio.charset.StandardCharsets;
 
 @Service
 public final class OcrService {
@@ -41,7 +42,7 @@ public final class OcrService {
 
     public Mono<String> textFromImageContains(@NotNull final FilePart filePart, @NotNull final String patternToSearch){
         return getCharactersFromFilePart(filePart).map(s -> {
-            if(s.contains(patternToSearch)) return "true";
+            if(s.contains(patternToSearch.toUpperCase())) return "true";
             return "false";
         });
     }
@@ -54,7 +55,7 @@ public final class OcrService {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
             BufferedImage image = ImageIO.read(inputStream);
-            return getCharactersFromImage(image);
+            return getCharactersFromImage(image).toUpperCase().replaceAll("\n","");
         } catch (Exception e) {
             e.printStackTrace();
             return FAIL_STRING;
