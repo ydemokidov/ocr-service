@@ -17,7 +17,7 @@ public interface CommonUtil {
         try {
             outputStream.write(a);
             outputStream.write(b);
-        }catch (final IOException e){
+        } catch (final IOException e) {
             e.printStackTrace();
         }
         return outputStream.toByteArray();

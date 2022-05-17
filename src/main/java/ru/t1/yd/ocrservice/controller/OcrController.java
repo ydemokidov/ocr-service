@@ -32,16 +32,16 @@ public class OcrController {
     }
 
     @PostMapping(value = "num", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<String> processImageForNums(@RequestPart("file") final FilePart filePart){
+    public Mono<String> processImageForNums(@RequestPart("file") final FilePart filePart) {
 
         return ocrService.getIntegerFromImage(filePart);
 
     }
 
-    @PostMapping(value = "searchpat",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public Mono<String> processImageForTextPattern(@RequestPart("file") final FilePart filePart,@RequestPart("pattern") String pattern){
+    @PostMapping(value = "searchpat", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<String> processImageForTextPattern(@RequestPart("file") final FilePart filePart, @RequestPart("pattern") String pattern) {
 
-        return ocrService.textFromImageContains(filePart,pattern);
+        return ocrService.textFromImageContains(filePart, pattern);
 
     }
 

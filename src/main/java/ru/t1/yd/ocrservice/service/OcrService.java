@@ -14,7 +14,6 @@ import ru.t1.yd.ocrservice.utils.CommonUtil;
 import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.nio.charset.StandardCharsets;
 
 @Service
 public final class OcrService {
@@ -32,17 +31,17 @@ public final class OcrService {
         tesseractInstance.setDatapath(datapath);
     }
 
-    public Mono<String> getFullStringFromImage(@NotNull final FilePart filePart){
+    public Mono<String> getFullStringFromImage(@NotNull final FilePart filePart) {
         return getCharactersFromFilePart(filePart);
     }
 
-    public Mono<String> getIntegerFromImage(@NotNull final FilePart filePart){
+    public Mono<String> getIntegerFromImage(@NotNull final FilePart filePart) {
         return getCharactersFromFilePart(filePart).map(s -> s.replaceAll("[^\\d]", ""));
     }
 
-    public Mono<String> textFromImageContains(@NotNull final FilePart filePart, @NotNull final String patternToSearch){
+    public Mono<String> textFromImageContains(@NotNull final FilePart filePart, @NotNull final String patternToSearch) {
         return getCharactersFromFilePart(filePart).map(s -> {
-            if(s.contains(patternToSearch.toUpperCase())) return "true";
+            if (s.contains(patternToSearch.toUpperCase())) return "true";
             return "false";
         });
     }
@@ -51,11 +50,11 @@ public final class OcrService {
         return tesseractInstance.doOCR(image);
     }
 
-    private String getCharactersFromImageBytes(byte[] imageBytes){
+    private String getCharactersFromImageBytes(byte[] imageBytes) {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
             BufferedImage image = ImageIO.read(inputStream);
-            return getCharactersFromImage(image).toUpperCase().replaceAll("\n","");
+            return getCharactersFromImage(image).toUpperCase().replaceAll("\n", "");
         } catch (Exception e) {
             e.printStackTrace();
             return FAIL_STRING;
