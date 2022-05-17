@@ -50,7 +50,7 @@ public final class OcrService {
         return tesseractInstance.doOCR(image);
     }
 
-    private String getCharactersFromImageBytes(byte[] imageBytes) {
+    private String getCharactersFromImageBytes(final byte[] imageBytes) {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
             BufferedImage image = ImageIO.read(inputStream);
