@@ -26,9 +26,6 @@ public final class OcrService {
     public OcrService(@NotNull final TessdataConfiguration tessdataConfiguration) {
         this.tesseractInstance = new Tesseract();
         tesseractInstance.setLanguage(tessdataConfiguration.getLang());
-
-        String datapath = CommonUtil.getResourceDirectoryPath() + "\\" + tessdataConfiguration.getPath();
-        tesseractInstance.setDatapath(datapath);
     }
 
     public Mono<String> getFullStringFromImage(@NotNull final FilePart filePart) {
@@ -54,6 +51,7 @@ public final class OcrService {
         try {
             ByteArrayInputStream inputStream = new ByteArrayInputStream(imageBytes);
             BufferedImage image = ImageIO.read(inputStream);
+            inputStream.close();
             return getCharactersFromImage(image).toUpperCase().replaceAll("\n", "");
         } catch (Exception e) {
             e.printStackTrace();
