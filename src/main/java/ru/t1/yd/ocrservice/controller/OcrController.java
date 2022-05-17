@@ -11,8 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 import ru.t1.yd.ocrservice.service.OcrService;
 
-import java.nio.file.Path;
-
 @RestController
 @RequestMapping("ocr")
 public class OcrController {
@@ -21,18 +19,30 @@ public class OcrController {
 
     @Autowired
     public OcrController(@NotNull final OcrService ocrService) {
+
         this.ocrService = ocrService;
+
     }
 
     @PostMapping(value = "text", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public Mono<String> processImageForText(@RequestPart("file") final FilePart filePart) {
-        try {
-            Path fileToCopy = Path.of("tstFile.bmp");
-            System.out.println(fileToCopy.toFile().getAbsolutePath());
-            return Mono.from(filePart.transferTo(fileToCopy)).thenReturn(ocrService.getFullStringFromImage(fileToCopy));
-        } catch (Exception e) {
-            return Mono.error(e);
-        }
+
+        return ocrService.getFullStringFromImage(filePart);
+
+    }
+
+    @PostMapping(value = "num", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<String> processImageForNums(@RequestPart("file") final FilePart filePart){
+
+        return ocrService.getIntegerFromImage(filePart);
+
+    }
+
+    @PostMapping(value = "searchpat",consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public Mono<String> processImageForTextPattern(@RequestPart("file") final FilePart filePart,@RequestPart("pattern") String pattern){
+
+        return ocrService.textFromImageContains(filePart,pattern);
+
     }
 
 }
